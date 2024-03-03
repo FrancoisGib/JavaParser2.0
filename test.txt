@@ -1,1 +1,12 @@
-n0ewe.fdusdhdhqs.disdi;
+package ok;
+
+import n0ewe.fdusdhdhqs.disdi.*;
+import Add;
+
+public class Make {
+   private int id;
+
+   public int getId() {
+      return id;
+   }
+}

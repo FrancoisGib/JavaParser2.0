@@ -1,4 +1,4 @@
-module Method (Method, parseMethodImplementation, methodP, abstractMethodP, countMethodLines, showMethods, (==)) where
+module Method (Method,  parseMethodImplementation, methodsP, abstractMethodP, countMethodLines, showMethods, (==)) where
 
 import Parser
 import Lib
@@ -34,7 +34,7 @@ instance Eq Method where
     (==) (AbstractMethod a1 b1 c1 d1 e1) (AbstractMethod a2 b2 c2 d2 e2) = a1 == a2 && b1 == b2 && c1 == c2 && d1 == d2 && e1 == e2
 
 parseMethodImplementation :: Parser LineCount
-parseMethodImplementation = spaceB (car '{') >> wellParenthesized 1 1
+parseMethodImplementation = spaceB (car '{') >> wellParenthesized 0 1
                         where
                             wellParenthesized lineCount 0 = (spaceB (car '\n') >> pure (lineCount + 1)) <|> pure lineCount
                             wellParenthesized lineCount cpt = 
@@ -61,3 +61,6 @@ showMethods methods = "[" ++ foldr (\method acc -> if isLast method methods then
                     where
                         isLast method [x] = x == method
                         isLast method (x:xs) = x /= method && isLast method xs
+
+methodsP :: Parser [Method]
+methodsP = many ((methodP <|> abstractMethodP) >>= \method ->(many $ car '\n') >> pure method)

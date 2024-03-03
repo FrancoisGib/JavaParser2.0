@@ -68,11 +68,9 @@ type LineCount = Int
 zeroOrMoreComma :: Parser a -> Parser [a]
 zeroOrMoreComma p = (p >>= \res -> (car ',' >> zeroOrMoreComma p >>= \others -> pure (res : others)) <|> pure [res]) <|> pure []
 
-nextLine :: Parser ()
-nextLine = do
-            many $ carQuand (\x -> x /= '\n')
-            car '\n' <|> pure '\0' -- if EOF
-            pure ()
+nextLine :: Parser Int
+nextLine = (many $ car '\n') >>= \l -> pure (length l)
+
 
 trimEnd :: String -> String
 trimEnd [] = ""
@@ -84,3 +82,15 @@ trimEnd (' ':xs) = if allSpaceAfter xs then "" else ' ' : trimEnd xs
          allSpaceAfter (x:xs) = False
 trimEnd (x:xs) = x : trimEnd xs
  
+commentAsterisque :: Parser ()
+commentAsterisque = (chaine "/**" <|> chaine "/*") >> parseUntilEnd >> pure ()
+   where
+      parseUntilEnd = (many (carQuand (\x -> x /= '/'))) >>= \asterisk -> if last asterisk == '*' then (car '/') else parseUntilEnd
+      last [x] = x
+         last (_:xs) = last xs
+
+commentSlash :: Parser ()
+commentSlash = chaine "//" >> (many (carQuand (\x -> x /= '\n'))) >> pure ()
+
+parseComments :: Parser ()
+parseComments = esp >> (parseComments1 <|> parseComments2 <|> pure ())
